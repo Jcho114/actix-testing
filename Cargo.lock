@@ -133,6 +133,7 @@ dependencies = [
  "envy",
  "once_cell",
  "pwhash",
+ "regex",
  "secrecy",
  "serde",
 ]

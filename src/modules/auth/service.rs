@@ -1,6 +1,8 @@
 use crate::{core::database::DbPool, modules::user::repo};
 use actix_web::{error, web, Error, Responder, Result};
+use once_cell::sync::Lazy;
 use pwhash::bcrypt;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
@@ -9,11 +11,19 @@ struct SignUpRequestBody {
     password: String,
 }
 
+static EMAIL_REGEX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"^[\w\.-]+@([\w-]+\.)+[\w-]{2,4}$").expect("Unable to compile email regex")
+});
+
 #[actix_web::post("/signup")]
 pub async fn sign_up(
     pool: web::Data<DbPool>,
     body: web::Json<SignUpRequestBody>,
 ) -> Result<impl Responder, Error> {
+    if !EMAIL_REGEX.is_match(&body.email) {
+        return Err(error::ErrorBadRequest("Provided email is invalid"));
+    }
+
     let mut conn = pool.get().expect("Could not get db conneciton from pool");
     if let false = repo::check_if_email_dne(&mut conn, body.email.clone()) {
         return Err(error::ErrorBadRequest("User with email already exists"));
