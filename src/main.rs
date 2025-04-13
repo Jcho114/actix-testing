@@ -3,6 +3,7 @@ mod modules;
 use actix_web::{
     middleware::from_fn, middleware::Logger, web, App, HttpResponse, HttpServer, Responder,
 };
+use core::config::CONFIG;
 use core::database::create_sqlite_pool;
 use modules::auth::{middleware::validate_middleware, service as auth_service};
 use modules::user::service as user_service;
@@ -17,6 +18,13 @@ async fn main() -> std::io::Result<()> {
     let pool = create_sqlite_pool();
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+
+    let environment = CONFIG.environment.clone().unwrap_or_default();
+    let hostname = if environment == "docker" {
+        "0.0.0.0"
+    } else {
+        "127.0.0.1"
+    };
 
     HttpServer::new(move || {
         App::new()
@@ -36,7 +44,7 @@ async fn main() -> std::io::Result<()> {
                     .service(auth_service::refresh),
             )
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind((hostname, 8080))?
     .run()
     .await
 }
