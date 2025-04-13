@@ -1,7 +1,7 @@
+mod core;
 mod modules;
 use actix_web::{middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
-use diesel::prelude::*;
-use diesel::r2d2::{ConnectionManager, Pool};
+use core::database::create_sqlite_pool;
 use modules::user::service as user_service;
 
 #[actix_web::get("/")]
@@ -9,15 +9,9 @@ async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello long compiles!")
 }
 
-pub type DbPool = Pool<ConnectionManager<SqliteConnection>>;
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let manager = ConnectionManager::<SqliteConnection>::new("data.db");
-    let pool = Pool::builder()
-        .test_on_check_out(true)
-        .build(manager)
-        .expect("Could not build connection pool");
+    let pool = create_sqlite_pool();
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 

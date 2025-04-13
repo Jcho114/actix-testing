@@ -3,3 +3,6 @@
 
 # database
 data.db
+
+# env
+*.env

@@ -13,10 +13,9 @@ pub struct User {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Insertable, Selectable, Serialize, Deserialize)]
+#[derive(Insertable, Selectable, Serialize)]
 #[diesel(table_name = schema::users)]
 pub struct NewUser {
     pub name: String,
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub hashed_password: String,
 }
