@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 #[diesel(table_name = schema::users)]
 pub struct User {
     pub id: i32,
-    pub name: String,
+    pub email: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,
@@ -16,6 +16,6 @@ pub struct User {
 #[derive(Insertable, Selectable, Serialize)]
 #[diesel(table_name = schema::users)]
 pub struct NewUser {
-    pub name: String,
+    pub email: String,
     pub hashed_password: String,
 }

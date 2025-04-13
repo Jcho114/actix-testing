@@ -4,3 +4,7 @@ pub mod user {
     pub mod schema;
     pub mod service;
 }
+
+pub mod auth {
+    pub mod service;
+}

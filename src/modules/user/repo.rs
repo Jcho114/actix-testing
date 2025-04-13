@@ -1,13 +1,25 @@
 use crate::modules::user::model::{NewUser, User};
+use crate::modules::user::schema::users::dsl::*;
 use diesel::prelude::SqliteConnection;
-use diesel::query_dsl::methods::{OrderDsl, SelectDsl};
+use diesel::query_dsl::methods::{FilterDsl, OrderDsl, SelectDsl};
+use diesel::result::Error::NotFound;
 use diesel::{ExpressionMethods, RunQueryDsl};
 
-pub fn insert_user(conn: &mut SqliteConnection, user_name: String, hash: String) -> User {
-    use crate::modules::user::schema::users::dsl::*;
+pub fn check_if_email_dne(conn: &mut SqliteConnection, user_email: String) -> bool {
+    let user = users
+        .select(id)
+        .filter(email.eq(user_email))
+        .first::<i32>(conn);
+    if let Err(NotFound) = user {
+        return true;
+    } else {
+        return false;
+    }
+}
 
+pub fn insert_user(conn: &mut SqliteConnection, user_email: String, hash: String) -> User {
     let new_user = NewUser {
-        name: user_name,
+        email: user_email,
         hashed_password: hash,
     };
 
@@ -17,17 +29,29 @@ pub fn insert_user(conn: &mut SqliteConnection, user_name: String, hash: String)
         .expect("Error inserting new user");
 
     users
-        .select((id, name, created_at, updated_at, deleted_at))
+        .select((id, email, created_at, updated_at, deleted_at))
         .order(id.desc())
         .first(conn)
         .expect("Error retrieveing user info")
 }
 
 pub fn select_users(conn: &mut SqliteConnection) -> Vec<User> {
-    use crate::modules::user::schema::users::dsl::*;
-
     users
-        .select((id, name, created_at, updated_at, deleted_at))
+        .select((id, email, created_at, updated_at, deleted_at))
         .load::<User>(conn)
         .expect("Error retrieving users")
+}
+
+pub fn retrieve_user_hashed_password(
+    conn: &mut SqliteConnection,
+    user_email: String,
+) -> Option<String> {
+    let user = users
+        .select(hashed_password)
+        .filter(email.eq(user_email))
+        .first::<String>(conn);
+    match user {
+        Ok(hash) => Some(hash),
+        Err(_) => None,
+    }
 }
