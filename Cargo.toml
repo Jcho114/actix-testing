@@ -1,0 +1,12 @@
+[package]
+name = "actix-testing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+diesel = { version = "2.2.9", features = ["sqlite", "r2d2", "chrono"] }
+chrono = { version = "0.4", features = ["serde"] }
+diesel_derives = "2.2.0"
+serde = { version = "1.0.219", features = ["derive"] }
+env_logger = "0.11.8"

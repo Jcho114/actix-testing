@@ -1,0 +1,7 @@
+CREATE TABLE users (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  name VARCHAR NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  updated_at TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  deleted_at TIMESTAMP DEFAULT NULL
+)
