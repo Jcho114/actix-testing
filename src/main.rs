@@ -1,8 +1,10 @@
 mod core;
 mod modules;
-use actix_web::{middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{
+    middleware::from_fn, middleware::Logger, web, App, HttpResponse, HttpServer, Responder,
+};
 use core::database::create_sqlite_pool;
-use modules::auth::service as auth_service;
+use modules::auth::{middleware::validate_middleware, service as auth_service};
 use modules::user::service as user_service;
 
 #[actix_web::get("/")]
@@ -21,11 +23,17 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .app_data(web::Data::new(pool.clone()))
             .service(hello)
-            .service(web::scope("/users").service(user_service::get_users))
+            .service(
+                web::scope("/users")
+                    .service(user_service::get_users)
+                    .wrap(from_fn(validate_middleware)),
+            )
             .service(
                 web::scope("/auth")
                     .service(auth_service::sign_up)
-                    .service(auth_service::login),
+                    .service(auth_service::login)
+                    .service(auth_service::validate)
+                    .service(auth_service::refresh),
             )
     })
     .bind(("127.0.0.1", 8080))?

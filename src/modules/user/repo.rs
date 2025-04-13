@@ -1,4 +1,4 @@
-use crate::modules::user::model::{NewUser, User};
+use crate::modules::user::model::{NewUser, User, UserIdPassword};
 use crate::modules::user::schema::users::dsl::*;
 use diesel::prelude::SqliteConnection;
 use diesel::query_dsl::methods::{FilterDsl, OrderDsl, SelectDsl};
@@ -42,16 +42,16 @@ pub fn select_users(conn: &mut SqliteConnection) -> Vec<User> {
         .expect("Error retrieving users")
 }
 
-pub fn retrieve_user_hashed_password(
+pub fn retrieve_user_id_password(
     conn: &mut SqliteConnection,
     user_email: String,
-) -> Option<String> {
+) -> Option<UserIdPassword> {
     let user = users
-        .select(hashed_password)
+        .select((id, hashed_password))
         .filter(email.eq(user_email))
-        .first::<String>(conn);
+        .first(conn);
     match user {
-        Ok(hash) => Some(hash),
+        Ok(id_password) => Some(id_password),
         Err(_) => None,
     }
 }

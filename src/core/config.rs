@@ -6,6 +6,7 @@ use serde::Deserialize;
 #[derive(Deserialize)]
 pub struct Configuration {
     pub db_path: SecretBox<String>,
+    pub jwt_secret: SecretBox<String>,
 }
 
 pub static CONFIG: Lazy<Configuration> = Lazy::new(|| {

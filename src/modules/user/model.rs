@@ -19,3 +19,10 @@ pub struct NewUser {
     pub email: String,
     pub hashed_password: String,
 }
+
+#[derive(Queryable, Selectable, Serialize, Deserialize)]
+#[diesel(table_name = schema::users)]
+pub struct UserIdPassword {
+    pub id: i32,
+    pub hashed_password: String,
+}
