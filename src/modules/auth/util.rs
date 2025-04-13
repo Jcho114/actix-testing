@@ -1,3 +1,4 @@
+use crate::core::config::CONFIG;
 use chrono::Utc;
 use jsonwebtoken::{
     decode, encode, errors::Error, Algorithm, DecodingKey, EncodingKey, Header, TokenData,
@@ -5,8 +6,6 @@ use jsonwebtoken::{
 };
 use secrecy::ExposeSecret;
 use serde::{Deserialize, Serialize};
-
-use crate::core::config::CONFIG;
 
 #[derive(Serialize, Deserialize)]
 pub struct AccessTokenClaims {
