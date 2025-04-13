@@ -1,8 +1,8 @@
 mod modules;
-use crate::modules::user::service as user_service;
 use actix_web::{middleware::Logger, web, App, HttpResponse, HttpServer, Responder};
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
+use modules::user::service as user_service;
 
 #[actix_web::get("/")]
 async fn hello() -> impl Responder {
