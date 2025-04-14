@@ -8,5 +8,5 @@ pub mod user {
 pub mod auth {
     pub mod middleware;
     pub mod service;
-    pub mod util;
+    pub mod token;
 }

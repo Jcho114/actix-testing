@@ -1,9 +1,6 @@
 use crate::{
     core::database::DbPool,
-    modules::{
-        auth::util::{self, generate_access_token},
-        user::repo,
-    },
+    modules::{auth::token, user::repo},
 };
 use actix_web::{cookie::Cookie, error, web, Error, HttpRequest, HttpResponse, Responder, Result};
 use once_cell::sync::Lazy;
@@ -38,13 +35,13 @@ pub async fn sign_up(
         bcrypt::hash(body.password.clone()).expect("Error hashing plain password");
     let new_user = repo::insert_user(&mut conn, body.email.clone(), hashed_password);
 
-    let access_token = util::generate_access_token(new_user.id);
+    let access_token = token::generate_access_token(new_user.id);
     if let Err(_) = access_token {
         return Err(error::ErrorUnauthorized(
             "Unable to generate access token for user",
         ));
     }
-    let refresh_token = util::generate_refresh_token(new_user.id);
+    let refresh_token = token::generate_refresh_token(new_user.id);
     if let Err(_) = refresh_token {
         return Err(error::ErrorUnauthorized(
             "Unable to generate refresh token for user",
@@ -98,13 +95,13 @@ pub async fn login(
         return Err(error::ErrorUnauthorized("Invalid password"));
     }
 
-    let access_token = util::generate_access_token(user_id_password.id);
+    let access_token = token::generate_access_token(user_id_password.id);
     if let Err(_) = access_token {
         return Err(error::ErrorUnauthorized(
             "Unable to generate access token for user",
         ));
     }
-    let refresh_token = util::generate_refresh_token(user_id_password.id);
+    let refresh_token = token::generate_refresh_token(user_id_password.id);
     if let Err(_) = refresh_token {
         return Err(error::ErrorUnauthorized(
             "Unable to generate refresh token for user",
@@ -147,7 +144,7 @@ pub async fn validate(request: HttpRequest) -> Result<impl Responder, Error> {
         return Err(error::ErrorUnauthorized("Access token is not provided"));
     }
     let access_token = access_cookie_option.unwrap().value().to_string();
-    if let None = util::validate_access_token(access_token) {
+    if let None = token::validate_access_token(access_token) {
         return Err(error::ErrorUnauthorized("Provided access token is invalid"));
     }
 
@@ -169,7 +166,7 @@ pub async fn refresh(request: HttpRequest) -> Result<impl Responder, Error> {
         return Err(error::ErrorUnauthorized("Refresh token is not provided"));
     }
     let refresh_token = refresh_cookie_option.unwrap().value().to_string();
-    let token_data_option = util::validate_refresh_token(refresh_token);
+    let token_data_option = token::validate_refresh_token(refresh_token);
     if let None = token_data_option {
         return Err(error::ErrorUnauthorized(
             "Provided refresh token is invalid",
@@ -177,7 +174,7 @@ pub async fn refresh(request: HttpRequest) -> Result<impl Responder, Error> {
     }
     let token_data = token_data_option.unwrap();
 
-    let access_token = generate_access_token(token_data.claims.sub);
+    let access_token = token::generate_access_token(token_data.claims.sub);
     let access_cookie = Cookie::build("access_token", access_token.unwrap().clone())
         .path("/")
         .http_only(true)
