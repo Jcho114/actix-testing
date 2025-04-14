@@ -1,9 +1,9 @@
 use crate::modules::user::schema;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Queryable, Selectable, Serialize, Deserialize)]
+#[derive(Queryable, Selectable, Serialize)]
 #[diesel(table_name = schema::users)]
 pub struct User {
     pub id: i32,
@@ -20,7 +20,7 @@ pub struct NewUser {
     pub hashed_password: String,
 }
 
-#[derive(Queryable, Selectable, Serialize, Deserialize)]
+#[derive(Queryable, Selectable)]
 #[diesel(table_name = schema::users)]
 pub struct UserIdPassword {
     pub id: i32,
